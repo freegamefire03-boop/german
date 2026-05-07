@@ -940,38 +940,7 @@
 
 <script>
 // ─── DEFAULT VOCABULARY ───────────────────────────────────────────────
-const DEFAULT_VOCAB = [
-  { article:"das", german:"Wasser",      pronunciation:"VAH-ser",      english:"water" },
-  { article:"das", german:"Brot",        pronunciation:"broht",        english:"bread" },
-  { article:"der", german:"Mann",        pronunciation:"mahn",         english:"man" },
-  { article:"die", german:"Frau",        pronunciation:"frow",         english:"woman / wife" },
-  { article:"das", german:"Kind",        pronunciation:"kint",         english:"child" },
-  { article:"das", german:"Haus",        pronunciation:"howss",        english:"house" },
-  { article:"das", german:"Buch",        pronunciation:"bookh",        english:"book" },
-  { article:"die", german:"Musik",       pronunciation:"moo-ZEEK",     english:"music" },
-  { article:"der", german:"Name",        pronunciation:"NAH-meh",      english:"name" },
-  { article:"die", german:"Hand",        pronunciation:"hahnt",        english:"hand" },
-  { article:"das", german:"Auto",        pronunciation:"OW-toh",       english:"car (auto)" },
-  { article:"die", german:"Familie",     pronunciation:"fah-MEE-lee-eh", english:"family" },
-  { article:"das", german:"Problem",     pronunciation:"proh-BLEM",    english:"problem" },
-  { article:"das", german:"Hotel",       pronunciation:"hoh-TEL",      english:"hotel" },
-  { article:"die", german:"Adresse",     pronunciation:"ah-DRES-seh",  english:"address" },
-  { article:"die", german:"Minute",      pronunciation:"mee-NOO-teh",  english:"minute" },
-  { article:"der", german:"Kaffee",      pronunciation:"KAH-feh",      english:"coffee" },
-  { article:"das", german:"Bier",        pronunciation:"beer",         english:"beer" },
-  { article:"die", german:"Milch",       pronunciation:"milkh",        english:"milk" },
-  { article:"die", german:"Schule",      pronunciation:"SHOO-leh",     english:"school" },
-  { article:"der", german:"Freund",      pronunciation:"froynt",       english:"friend (m)" },
-  { article:"die", german:"Freundin",    pronunciation:"FROYN-din",    english:"friend (f)" },
-  { article:"der", german:"Computer",    pronunciation:"kom-PYOO-ter", english:"computer" },
-  { article:"das", german:"Internet",    pronunciation:"IN-ter-net",   english:"internet" },
-  { article:"die", german:"Energie",     pronunciation:"en-er-GEE",    english:"energy" },
-  { article:"die", german:"Situation",   pronunciation:"zi-too-AH-tsi-ohn", english:"situation" },
-  { article:"die", german:"Telefon",     pronunciation:"teh-leh-FOHN", english:"telephone" },
-  { article:"das", german:"Restaurant",  pronunciation:"res-toh-RANG",  english:"restaurant" },
-  { article:"die", german:"Information", pronunciation:"in-for-mah-TSEE-ohn", english:"information" },
-  { article:"der", german:"Moment",      pronunciation:"moh-MENT",     english:"moment" },
-];
+// Words are loaded from words.json on first run
 
 // ─── STATE ────────────────────────────────────────────────────────────
 let vocab = [];
@@ -984,27 +953,41 @@ let sessionCount = 0;
 const LS_VOCAB  = 'deutsch_vocab';
 const LS_PASSED = 'deutsch_passed';
 
-function loadState() {
+async function loadState() {
   const v = localStorage.getItem(LS_VOCAB);
   const p = localStorage.getItem(LS_PASSED);
+
   if (v) {
     try {
       const parsed = JSON.parse(v);
       vocab = (Array.isArray(parsed) && parsed.length > 0)
         ? parsed
-        : JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+        : await fetchDefaultWords();
     } catch(e) {
-      vocab = JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+      vocab = await fetchDefaultWords();
     }
   } else {
-    // First ever load — seed from defaults and persist immediately
-    vocab = JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+    // First ever load — fetch from words.json and save
+    vocab = await fetchDefaultWords();
     localStorage.setItem(LS_VOCAB, JSON.stringify(vocab));
   }
+
   try {
     passed = p ? new Set(JSON.parse(p)) : new Set();
   } catch(e) {
     passed = new Set();
+  }
+}
+
+async function fetchDefaultWords() {
+  try {
+    const res = await fetch('words.json');
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    return data;
+  } catch(e) {
+    console.error('Could not load words.json', e);
+    return [];
   }
 }
 
@@ -1427,9 +1410,12 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-loadQuizState();
-buildQueue();
-render();
+(async () => {
+  await loadState();
+  loadQuizState();
+  buildQueue();
+  render();
+})();
 </script>
 </body>
 </html>
