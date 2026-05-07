@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Deutsch Lernen — German Flashcards</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D0C14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Deutsch">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  :root {
+    --bg:       #0D0C14;
+    --surface:  #16141F;
+    --surface2: #1E1C2A;
+    --border:   rgba(255,255,255,0.07);
+
+    --orange:   #FF6B35;
+    --orange-glow: rgba(255,107,53,0.35);
+    --mint:     #00E5C3;
+    --mint-glow: rgba(0,229,195,0.3);
+    --violet:   #A78BFA;
+    --rose:     #FB7185;
+    --cream:    #FEF9F0;
+    --ink:      #150F20;
+
+    --card-front-bg: #1A2535;
+
+    --pass:     #00E5C3;
+    --pass-glow: rgba(0,229,195,0.4);
+    --repeat:   #FB7185;
+    --repeat-glow: rgba(251,113,133,0.4);
+
+    --card-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    color: #fff;
+  }
+
+  /* Ambient background blobs */
+  body::before {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    top: -200px; left: -150px;
+    background: radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    width: 500px; height: 500px;
+    bottom: -100px; right: -100px;
+    background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 28px 18px 48px;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .logo em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--orange), var(--rose));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .logo span {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: block;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-top: 2px;
+  }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: rgba(255,255,255,0.55);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover {
+    background: var(--surface2);
+    color: var(--orange);
+    border-color: rgba(255,107,53,0.4);
+    box-shadow: 0 0 16px rgba(255,107,53,0.2);
+    transform: translateY(-1px);
+  }
+
+  /* PROGRESS */
+  .progress-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 22px;
+    margin-bottom: 22px;
+  }
+
+  .progress-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--orange), var(--violet));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .progress-bar-track {
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--rose), var(--violet));
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 0 8px var(--orange-glow);
+  }
+
+  /* CARD AREA */
+  .card-area {
+    perspective: 1400px;
+    margin-bottom: 20px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-wrapper { width: 100%; }
+
+  .card-scene {
+    width: 100%;
+    height: 290px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+  }
+  .card-scene.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 26px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 32px;
+    overflow: hidden;
+  }
+
+  /* FRONT — dark cold card */
+  .card-front {
+    background: var(--card-front-bg);
+    box-shadow: var(--card-shadow), 0 0 40px rgba(100,140,200,0.1);
+    border: 1px solid rgba(100,140,255,0.12);
+  }
+  .card-front::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 26px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(100,140,255,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* BACK — dark card */
+  .card-back {
+    background: var(--surface2);
+    transform: rotateY(180deg);
+    border: 1px solid rgba(0,229,195,0.2);
+    box-shadow: var(--card-shadow), 0 0 40px rgba(0,229,195,0.1);
+  }
+  .card-back::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 26px;
+    background: radial-gradient(ellipse at 30% 80%, rgba(0,229,195,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* article is now inline — hidden as a standalone badge */
+  .card-article { display: none; }
+
+  /* article + word combined on one line */
+  .card-word-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.22em;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .card-article-inline,
+  .card-word {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.6rem;
+    font-weight: 400;
+    letter-spacing: 3px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  /* article gets its color, word stays white */
+  .card-front .card-article-inline.art-der { color: #7EB8FF; }
+  .card-front .card-article-inline.art-die { color: #FF85A1; }
+  .card-front .card-article-inline.art-das { color: #5DECC8; }
+  .card-front .card-word { color: #FFFFFF; }
+
+  .card-back .card-article-inline.art-der { color: #7EB8FF; }
+  .card-back .card-article-inline.art-die { color: #FF85A1; }
+  .card-back .card-article-inline.art-das { color: #5DECC8; }
+  .card-back  .card-word { color: var(--cream); }
+
+  .card-pronunciation {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: 'Nunito', monospace;
+    padding: 4px 14px;
+    border-radius: 6px;
+  }
+  .card-front .card-pronunciation {
+    color: var(--orange);
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.2);
+  }
+  .card-back .card-pronunciation {
+    color: var(--mint);
+    background: rgba(0,229,195,0.08);
+    border: 1px solid rgba(0,229,195,0.15);
+  }
+
+  .card-translation {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cream);
+    text-align: center;
+    margin-top: 10px;
+    opacity: 0.9;
+  }
+
+  .card-hint {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    position: absolute;
+    bottom: 20px;
+  }
+  .card-front .card-hint { color: rgba(255,255,255,0.2); }
+  .card-back  .card-hint { color: rgba(255,255,255,0.25); }
+
+  .card-number {
+    position: absolute;
+    top: 18px; right: 22px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    opacity: 0.2;
+    color: #fff;
+  }
+
+  /* ARTICLE BADGES — unused now (inline instead) */
+  .article-der, .article-die, .article-das { display: none; }
+
+  /* BUTTONS */
+  .card-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  .btn-action {
+    flex: 1;
+    max-width: 210px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(.4,0,.2,1);
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-action:active { transform: scale(0.95); }
+
+  .btn-repeat {
+    background: rgba(251,113,133,0.12);
+    color: var(--rose);
+    border: 1px solid rgba(251,113,133,0.25);
+  }
+  .btn-repeat:hover {
+    background: var(--rose);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 28px var(--repeat-glow);
+    transform: translateY(-2px);
+  }
+
+  .btn-pass {
+    background: rgba(0,229,195,0.1);
+    color: var(--mint);
+    border: 1px solid rgba(0,229,195,0.2);
+  }
+  .btn-pass:hover {
+    background: var(--mint);
+    color: var(--ink);
+    border-color: transparent;
+    box-shadow: 0 8px 28px var(--pass-glow);
+    transform: translateY(-2px);
+  }
+
+  /* PANELS */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .panel.open { display: block; }
+
+  .panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: var(--cream);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .json-textarea {
+    width: 100%;
+    min-height: 120px;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.8);
+    font-family: monospace;
+    font-size: 0.8rem;
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .json-textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
+
+  .json-hint {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .btn-primary {
+    margin-top: 12px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, var(--orange), var(--rose));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(255,107,53,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,107,53,0.4); }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    margin-top: 8px;
+    margin-left: 8px;
+    padding: 10px 22px;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--mint); color: var(--mint); }
+
+  .msg {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    display: none;
+  }
+  .msg.show { display: block; }
+  .msg.success { background: rgba(0,229,195,0.1); color: var(--mint); border: 1px solid rgba(0,229,195,0.2); }
+  .msg.error   { background: rgba(251,113,133,0.1); color: var(--rose); border: 1px solid rgba(251,113,133,0.2); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.4);
+  }
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; display: block; }
+  .empty-state p { font-weight: 700; font-size: 1rem; }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-der { background: #A78BFA; box-shadow: 0 0 6px rgba(167,139,250,0.6); }
+  .dot-die { background: #FB7185; box-shadow: 0 0 6px rgba(251,113,133,0.6); }
+  .dot-das { background: #00E5C3; box-shadow: 0 0 6px rgba(0,229,195,0.6); }
+
+  /* ANIMATIONS */
+  @keyframes popIn {
+    0%   { transform: scale(0.88) translateY(12px); opacity: 0; }
+    65%  { transform: scale(1.03) translateY(-2px); }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .card-wrapper { animation: popIn 0.42s cubic-bezier(.4,0,.2,1); }
+
+  @media (max-width: 480px) {
+    .card-word  { font-size: 2.7rem; }
+    .card-scene { height: 260px; }
+    .logo       { font-size: 1.6rem; }
+  }
+
+  /* ── QUIZ SECTION ──────────────────────────────────────────── */
+  .quiz-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 20px;
+  }
+  .quiz-divider::before,
+  .quiz-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .quiz-divider-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.2);
+    white-space: nowrap;
+  }
+
+  .quiz-toggle-btn {
+    width: 100%;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    color: rgba(255,255,255,0.55);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.22s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .quiz-toggle-btn:hover {
+    background: var(--surface2);
+    border-color: rgba(167,139,250,0.4);
+    color: var(--violet);
+    box-shadow: 0 0 20px rgba(167,139,250,0.15);
+    transform: translateY(-1px);
+  }
+  .quiz-toggle-btn.active {
+    background: rgba(167,139,250,0.1);
+    border-color: rgba(167,139,250,0.35);
+    color: var(--violet);
+  }
+
+  .quiz-section {
+    display: none;
+  }
+  .quiz-section.open {
+    display: block;
+  }
+
+  /* Quiz stats bar */
+  .quiz-stats-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .quiz-stat { text-align: center; }
+  .quiz-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--violet), var(--mint));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .quiz-stat-label {
+    font-size: 0.58rem;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* Quiz card */
+  .quiz-card {
+    background: var(--surface2);
+    border: 1px solid rgba(167,139,250,0.18);
+    border-radius: 22px;
+    padding: 40px 28px 32px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s;
+  }
+  .quiz-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(167,139,250,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .quiz-card.correct {
+    border-color: rgba(0,229,195,0.5);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,229,195,0.1);
+  }
+  .quiz-card.wrong {
+    border-color: rgba(251,113,133,0.5);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(251,113,133,0.1);
+  }
+
+  .quiz-noun {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.4rem;
+    color: #fff;
+    letter-spacing: 3px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .quiz-noun-english {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* progress pips */
+  .quiz-progress-pips {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+  .pip {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.25s;
+  }
+  .pip.filled {
+    background: var(--violet);
+    border-color: var(--violet);
+    box-shadow: 0 0 8px rgba(167,139,250,0.6);
+  }
+
+  /* feedback banner inside card */
+  .quiz-feedback {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.25s;
+    white-space: nowrap;
+  }
+  .quiz-feedback.show { opacity: 1; }
+  .quiz-feedback.correct-text { color: var(--mint); }
+  .quiz-feedback.wrong-text   { color: var(--rose); }
+
+  /* Answer buttons */
+  .quiz-answers {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .btn-article {
+    flex: 1;
+    max-width: 160px;
+    padding: 16px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--surface);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    color: rgba(255,255,255,0.6);
+  }
+  .btn-article:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+  .btn-article:active:not(:disabled) { transform: scale(0.95); }
+  .btn-article:disabled { cursor: default; opacity: 0.5; }
+
+  .btn-article.der-btn:hover:not(:disabled) {
+    background: rgba(126,184,255,0.15);
+    border-color: rgba(126,184,255,0.5);
+    color: #7EB8FF;
+    box-shadow: 0 8px 24px rgba(126,184,255,0.2);
+  }
+  .btn-article.die-btn:hover:not(:disabled) {
+    background: rgba(255,133,161,0.15);
+    border-color: rgba(255,133,161,0.5);
+    color: #FF85A1;
+    box-shadow: 0 8px 24px rgba(255,133,161,0.2);
+  }
+  .btn-article.das-btn:hover:not(:disabled) {
+    background: rgba(93,236,200,0.15);
+    border-color: rgba(93,236,200,0.5);
+    color: #5DECC8;
+    box-shadow: 0 8px 24px rgba(93,236,200,0.2);
+  }
+
+  /* reveal correct article after wrong answer */
+  .btn-article.reveal-correct.der-btn {
+    background: rgba(126,184,255,0.18);
+    border-color: rgba(126,184,255,0.6);
+    color: #7EB8FF;
+    box-shadow: 0 0 20px rgba(126,184,255,0.25);
+    opacity: 1 !important;
+  }
+  .btn-article.reveal-correct.die-btn {
+    background: rgba(255,133,161,0.18);
+    border-color: rgba(255,133,161,0.6);
+    color: #FF85A1;
+    box-shadow: 0 0 20px rgba(255,133,161,0.25);
+    opacity: 1 !important;
+  }
+  .btn-article.reveal-correct.das-btn {
+    background: rgba(93,236,200,0.18);
+    border-color: rgba(93,236,200,0.6);
+    color: #5DECC8;
+    box-shadow: 0 0 20px rgba(93,236,200,0.25);
+    opacity: 1 !important;
+  }
+
+  .quiz-next-btn {
+    width: 100%;
+    padding: 13px;
+    background: rgba(167,139,250,0.12);
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 14px;
+    color: var(--violet);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+  .quiz-next-btn.show {
+    display: block;
+  }
+  .quiz-next-btn:hover {
+    background: var(--violet);
+    color: var(--ink);
+    box-shadow: 0 8px 24px rgba(167,139,250,0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Quiz empty / done states */
+  .quiz-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.4);
+  }
+  .quiz-empty .emoji { font-size: 2.6rem; margin-bottom: 10px; display: block; }
+  .quiz-empty p { font-weight: 700; font-size: 0.95rem; line-height: 1.7; }
+  .quiz-empty p strong { color: var(--violet); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <em>Deutsch</em>
+      <span>Flash Cards</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" id="btnImportPanel" title="Import / Export progress">💾</button>
+      <button class="btn-icon" id="btnAddPanel" title="Add vocabulary">＋</button>
+      <button class="btn-icon" id="btnResetAll" title="Reset all progress">🔄</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section">
+    <div class="progress-stats">
+      <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
+      <div class="stat"><div class="stat-num" id="statRemaining">0</div><div class="stat-label">Remaining</div></div>
+      <div class="stat"><div class="stat-num" id="statPassed">0</div><div class="stat-label">Mastered</div></div>
+      <div class="stat"><div class="stat-num" id="statSession">0</div><div class="stat-label">This Run</div></div>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- ARTICLE LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-der"></div>der (m)</div>
+    <div class="legend-item"><div class="legend-dot dot-die"></div>die (f)</div>
+    <div class="legend-item"><div class="legend-dot dot-das"></div>das (n)</div>
+  </div>
+
+  <!-- CARD AREA -->
+  <div class="card-area" id="cardArea">
+    <div class="card-wrapper" id="cardWrapper">
+      <div class="card-scene" id="cardScene">
+
+        <div class="card-face card-front">
+          <span class="card-number" id="cardNumber">#1</span>
+          <div class="card-word-line">
+            <span class="card-article-inline art-der" id="cardArticleInline">der</span>
+            <span class="card-word" id="cardWord">—</span>
+          </div>
+          <div class="card-pronunciation" id="cardPronun">—</div>
+          <div class="card-hint">tap to reveal →</div>
+        </div>
+
+        <div class="card-face card-back">
+          <span class="card-number" id="cardNumberBack">#1</span>
+          <div class="card-word-line">
+            <span class="card-word" id="cardTranslation">—</span>
+          </div>
+          <div class="card-hint">← tap to flip back</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="card-buttons" id="cardButtons">
+    <button class="btn-action btn-repeat" id="btnRepeat">🔁 &nbsp;Repeat</button>
+    <button class="btn-action btn-pass" id="btnPass">✓ &nbsp;Got it!</button>
+  </div>
+
+  <!-- ADD VOCABULARY PANEL -->
+  <div class="panel" id="panelAdd">
+    <div class="panel-title">📥 Add Vocabulary</div>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:10px;">Paste a JSON array. New words will be <strong style="color:var(--yellow)">appended</strong> to your existing list, not replaced.</p>
+    <textarea class="json-textarea" id="jsonInput" placeholder='[
+  {
+    "article": "der",
+    "german": "Hund",
+    "pronunciation": "hoont",
+    "english": "dog"
+  },
+  ...
+]'></textarea>
+    <div class="json-hint">
+      Fields: <code style="color:var(--yellow)">article</code> (der/die/das), <code style="color:var(--yellow)">german</code>, <code style="color:var(--yellow)">pronunciation</code>, <code style="color:var(--yellow)">english</code>
+    </div>
+    <button class="btn-primary" id="btnImportJson">Import & Append</button>
+    <div class="msg" id="msgImport"></div>
+  </div>
+
+  <!-- SAVE / LOAD PANEL -->
+  <div class="panel" id="panelSave">
+    <div class="panel-title">💾 Save & Restore Progress</div>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:14px;">Export your full progress (vocabulary + which words you've mastered) to a file. Import it on any browser to continue where you left off.</p>
+    <button class="btn-primary" id="btnExport">⬇ Download Progress File</button>
+    <button class="btn-secondary" id="btnUploadTrigger">⬆ Upload Progress File</button>
+    <input type="file" id="fileUpload" accept=".json" style="display:none">
+    <div class="msg" id="msgSave"></div>
+  </div>
+
+  <!-- QUIZ DIVIDER -->
+  <div class="quiz-divider">
+    <span class="quiz-divider-label">Article Quiz</span>
+  </div>
+
+  <!-- QUIZ TOGGLE -->
+  <button class="quiz-toggle-btn" id="btnQuizToggle">🧠 &nbsp;Gender Quiz — Test der / die / das</button>
+
+  <!-- QUIZ SECTION -->
+  <div class="quiz-section" id="quizSection">
+
+    <!-- Quiz Stats -->
+    <div class="quiz-stats-bar">
+      <div class="quiz-stat"><div class="quiz-stat-num" id="qStatPool">0</div><div class="quiz-stat-label">In Pool</div></div>
+      <div class="quiz-stat"><div class="quiz-stat-num" id="qStatMastered">0</div><div class="quiz-stat-label">Mastered</div></div>
+      <div class="quiz-stat"><div class="quiz-stat-num" id="qStatCorrect">0</div><div class="quiz-stat-label">Correct</div></div>
+      <div class="quiz-stat"><div class="quiz-stat-num" id="qStatWrong">0</div><div class="quiz-stat-label">Wrong</div></div>
+    </div>
+
+    <!-- Quiz Card -->
+    <div id="quizCardArea">
+      <!-- filled by JS -->
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ─── DEFAULT VOCABULARY ───────────────────────────────────────────────
+const DEFAULT_VOCAB = [
+  { article:"das", german:"Wasser",      pronunciation:"VAH-ser",      english:"water" },
+  { article:"das", german:"Brot",        pronunciation:"broht",        english:"bread" },
+  { article:"der", german:"Mann",        pronunciation:"mahn",         english:"man" },
+  { article:"die", german:"Frau",        pronunciation:"frow",         english:"woman / wife" },
+  { article:"das", german:"Kind",        pronunciation:"kint",         english:"child" },
+  { article:"das", german:"Haus",        pronunciation:"howss",        english:"house" },
+  { article:"das", german:"Buch",        pronunciation:"bookh",        english:"book" },
+  { article:"die", german:"Musik",       pronunciation:"moo-ZEEK",     english:"music" },
+  { article:"der", german:"Name",        pronunciation:"NAH-meh",      english:"name" },
+  { article:"die", german:"Hand",        pronunciation:"hahnt",        english:"hand" },
+  { article:"das", german:"Auto",        pronunciation:"OW-toh",       english:"car (auto)" },
+  { article:"die", german:"Familie",     pronunciation:"fah-MEE-lee-eh", english:"family" },
+  { article:"das", german:"Problem",     pronunciation:"proh-BLEM",    english:"problem" },
+  { article:"das", german:"Hotel",       pronunciation:"hoh-TEL",      english:"hotel" },
+  { article:"die", german:"Adresse",     pronunciation:"ah-DRES-seh",  english:"address" },
+  { article:"die", german:"Minute",      pronunciation:"mee-NOO-teh",  english:"minute" },
+  { article:"der", german:"Kaffee",      pronunciation:"KAH-feh",      english:"coffee" },
+  { article:"das", german:"Bier",        pronunciation:"beer",         english:"beer" },
+  { article:"die", german:"Milch",       pronunciation:"milkh",        english:"milk" },
+  { article:"die", german:"Schule",      pronunciation:"SHOO-leh",     english:"school" },
+  { article:"der", german:"Freund",      pronunciation:"froynt",       english:"friend (m)" },
+  { article:"die", german:"Freundin",    pronunciation:"FROYN-din",    english:"friend (f)" },
+  { article:"der", german:"Computer",    pronunciation:"kom-PYOO-ter", english:"computer" },
+  { article:"das", german:"Internet",    pronunciation:"IN-ter-net",   english:"internet" },
+  { article:"die", german:"Energie",     pronunciation:"en-er-GEE",    english:"energy" },
+  { article:"die", german:"Situation",   pronunciation:"zi-too-AH-tsi-ohn", english:"situation" },
+  { article:"die", german:"Telefon",     pronunciation:"teh-leh-FOHN", english:"telephone" },
+  { article:"das", german:"Restaurant",  pronunciation:"res-toh-RANG",  english:"restaurant" },
+  { article:"die", german:"Information", pronunciation:"in-for-mah-TSEE-ohn", english:"information" },
+  { article:"der", german:"Moment",      pronunciation:"moh-MENT",     english:"moment" },
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────
+let vocab = [];
+let passed = new Set();
+let queue = [];
+let currentIndex = 0;
+let isFlipped = false;
+let sessionCount = 0;
+
+const LS_VOCAB  = 'deutsch_vocab';
+const LS_PASSED = 'deutsch_passed';
+
+function loadState() {
+  const v = localStorage.getItem(LS_VOCAB);
+  const p = localStorage.getItem(LS_PASSED);
+  vocab  = v ? JSON.parse(v) : JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+  passed = p ? new Set(JSON.parse(p)) : new Set();
+}
+
+function saveState() {
+  localStorage.setItem(LS_VOCAB,  JSON.stringify(vocab));
+  localStorage.setItem(LS_PASSED, JSON.stringify([...passed]));
+}
+
+// ─── QUEUE ────────────────────────────────────────────────────────────
+function buildQueue() {
+  queue = vocab
+    .map((w, i) => i)
+    .filter(i => !passed.has(i));
+  shuffle(queue);
+  currentIndex = 0;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────
+function render() {
+  updateStats();
+  if (queue.length === 0 || currentIndex >= queue.length) {
+    showEmptyState();
+    return;
+  }
+  const idx = queue[currentIndex];
+  const word = vocab[idx];
+
+  // Reset flip
+  isFlipped = false;
+  const scene = document.getElementById('cardScene');
+  scene.classList.remove('flipped');
+
+  const artClass = 'card-article-inline art-' + word.article.toLowerCase();
+
+  const artFront = document.getElementById('cardArticleInline');
+  artFront.textContent = word.article;
+  artFront.className = artClass;
+
+  document.getElementById('cardWord').textContent        = word.german;
+  document.getElementById('cardPronun').textContent      = '[ ' + word.pronunciation + ' ]';
+  document.getElementById('cardTranslation').textContent = word.english;
+  document.getElementById('cardNumber').textContent      = '#' + (idx + 1);
+  document.getElementById('cardNumberBack').textContent  = '#' + (idx + 1);
+
+  // Animate card in
+  const wrapper = document.getElementById('cardWrapper');
+  wrapper.style.animation = 'none';
+  void wrapper.offsetWidth;
+  wrapper.style.animation = 'popIn 0.38s cubic-bezier(.4,0,.2,1)';
+
+  document.getElementById('cardButtons').style.display = 'flex';
+  document.getElementById('cardArea').querySelector('.empty-state')?.remove();
+}
+
+function showEmptyState() {
+  document.getElementById('cardButtons').style.display = 'none';
+  document.getElementById('cardArea').innerHTML = `
+    <div class="empty-state">
+      <div class="emoji">🎉</div>
+      <p style="color:var(--yellow);font-size:1.2rem;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;margin-bottom:6px;">All Words Mastered!</p>
+      <p>Amazing job — you've passed all ${vocab.length} words.</p>
+      <button class="btn-primary" style="margin-top:16px" onclick="resetPassed()">Start Fresh 🔄</button>
+    </div>`;
+}
+
+function updateStats() {
+  const total     = vocab.length;
+  const mastCount = passed.size;
+  const remaining = total - mastCount;
+  const pct       = total > 0 ? (mastCount / total) * 100 : 0;
+
+  document.getElementById('statTotal').textContent     = total;
+  document.getElementById('statRemaining').textContent = remaining;
+  document.getElementById('statPassed').textContent    = mastCount;
+  document.getElementById('statSession').textContent   = sessionCount;
+  document.getElementById('progressFill').style.width  = pct + '%';
+}
+
+// ─── FLIP ─────────────────────────────────────────────────────────────
+document.getElementById('cardScene').addEventListener('click', () => {
+  isFlipped = !isFlipped;
+  document.getElementById('cardScene').classList.toggle('flipped', isFlipped);
+});
+
+// ─── PASS / REPEAT ────────────────────────────────────────────────────
+document.getElementById('btnPass').addEventListener('click', () => {
+  const idx = queue[currentIndex];
+  passed.add(idx);
+  sessionCount++;
+  saveState();
+  next();
+});
+
+document.getElementById('btnRepeat').addEventListener('click', () => {
+  next(true);
+});
+
+function next(repeat = false) {
+  if (repeat) {
+    // Move current to end of queue
+    const cur = queue.splice(currentIndex, 1)[0];
+    queue.push(cur);
+    // currentIndex stays the same (now points to next card)
+    if (currentIndex >= queue.length) currentIndex = 0;
+  } else {
+    currentIndex++;
+    if (currentIndex >= queue.length) {
+      // Rebuild queue (remove newly passed)
+      buildQueue();
+    }
+  }
+  render();
+}
+
+// ─── IMPORT JSON ──────────────────────────────────────────────────────
+document.getElementById('btnImportJson').addEventListener('click', () => {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const msg = document.getElementById('msgImport');
+  if (!raw) { showMsg(msg, 'Paste JSON first.', 'error'); return; }
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) throw new Error('Expected an array');
+    let added = 0;
+    arr.forEach(item => {
+      if (item.german && item.english && item.pronunciation && item.article) {
+        vocab.push({ article: item.article, german: item.german, pronunciation: item.pronunciation, english: item.english });
+        added++;
+      }
+    });
+    if (added === 0) throw new Error('No valid items found');
+    saveState();
+    buildQueue();
+    render();
+    document.getElementById('jsonInput').value = '';
+    showMsg(msg, `✓ Added ${added} word${added > 1 ? 's' : ''} to your list!`, 'success');
+  } catch(e) {
+    showMsg(msg, '✗ Invalid JSON: ' + e.message, 'error');
+  }
+});
+
+// ─── EXPORT / IMPORT PROGRESS ─────────────────────────────────────────
+document.getElementById('btnExport').addEventListener('click', () => {
+  const data = { vocab, passed: [...passed], exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'deutsch_progress_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showMsg(document.getElementById('msgSave'), '✓ Progress file downloaded!', 'success');
+});
+
+document.getElementById('btnUploadTrigger').addEventListener('click', () => {
+  document.getElementById('fileUpload').click();
+});
+
+document.getElementById('fileUpload').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (!data.vocab || !data.passed) throw new Error('Invalid progress file format');
+      vocab  = data.vocab;
+      passed = new Set(data.passed);
+      saveState();
+      buildQueue();
+      render();
+      showMsg(document.getElementById('msgSave'), `✓ Loaded ${vocab.length} words, ${passed.size} mastered.`, 'success');
+    } catch(e) {
+      showMsg(document.getElementById('msgSave'), '✗ Could not read file: ' + e.message, 'error');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+// ─── PANEL TOGGLES ────────────────────────────────────────────────────
+function togglePanel(id) {
+  const p = document.getElementById(id);
+  const isOpen = p.classList.contains('open');
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('open'));
+  if (!isOpen) p.classList.add('open');
+}
+
+document.getElementById('btnAddPanel').addEventListener('click', () => togglePanel('panelAdd'));
+document.getElementById('btnImportPanel').addEventListener('click', () => togglePanel('panelSave'));
+
+document.getElementById('btnResetAll').addEventListener('click', () => {
+  if (confirm('Reset all mastered words? Your vocabulary list will stay.')) {
+    resetPassed();
+  }
+});
+
+function resetPassed() {
+  passed.clear();
+  sessionCount = 0;
+  saveState();
+  buildQueue();
+  render();
+}
+
+// ─── UTIL ─────────────────────────────────────────────────────────────
+function showMsg(el, text, type) {
+  el.textContent = text;
+  el.className = 'msg show ' + type;
+  setTimeout(() => { el.classList.remove('show'); }, 3500);
+}
+
+// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'TEXTAREA') return;
+  if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    document.getElementById('cardScene').click();
+  }
+  if (e.key === 'ArrowRight') document.getElementById('btnPass').click();
+  if (e.key === 'ArrowLeft')  document.getElementById('btnRepeat').click();
+});
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────
+// quizProgress: { [vocabIndex]: correctCount }  (0–3, once 3 → mastered in quiz)
+// quizMastered: Set of vocab indices mastered in quiz
+const LS_QUIZ_PROGRESS = 'deutsch_quiz_progress';
+const LS_QUIZ_MASTERED = 'deutsch_quiz_mastered';
+
+let quizProgress = {};   // { idx: correctCount }
+let quizMastered = new Set();
+let quizQueue    = [];
+let quizCurrent  = null; // vocab index
+let quizAnswered = false;
+let quizSessionCorrect = 0;
+let quizSessionWrong   = 0;
+
+function loadQuizState() {
+  const p = localStorage.getItem(LS_QUIZ_PROGRESS);
+  const m = localStorage.getItem(LS_QUIZ_MASTERED);
+  quizProgress = p ? JSON.parse(p) : {};
+  quizMastered = m ? new Set(JSON.parse(m)) : new Set();
+}
+
+function saveQuizState() {
+  localStorage.setItem(LS_QUIZ_PROGRESS, JSON.stringify(quizProgress));
+  localStorage.setItem(LS_QUIZ_MASTERED, JSON.stringify([...quizMastered]));
+}
+
+// Pool = passed (flashcard-mastered) nouns that are NOT yet quiz-mastered
+function buildQuizQueue() {
+  quizQueue = [];
+  passed.forEach(idx => {
+    const w = vocab[idx];
+    if (!w) return;
+    if (quizMastered.has(idx)) return;
+    quizQueue.push(idx);
+  });
+  shuffle(quizQueue);
+}
+
+function updateQuizStats() {
+  const pool     = quizQueue.length + (quizCurrent !== null && !quizMastered.has(quizCurrent) ? 0 : 0);
+  const inPool   = passed.size - quizMastered.size;
+  document.getElementById('qStatPool').textContent     = Math.max(0, inPool);
+  document.getElementById('qStatMastered').textContent = quizMastered.size;
+  document.getElementById('qStatCorrect').textContent  = quizSessionCorrect;
+  document.getElementById('qStatWrong').textContent    = quizSessionWrong;
+}
+
+function renderQuiz() {
+  updateQuizStats();
+  const area = document.getElementById('quizCardArea');
+
+  // If nothing in pool
+  if (passed.size === 0) {
+    area.innerHTML = `<div class="quiz-empty">
+      <span class="emoji">📚</span>
+      <p>No mastered words yet.<br>Use the flashcards and hit <strong>Got it!</strong> on words you know.<br>They'll appear here for gender practice.</p>
+    </div>`;
+    return;
+  }
+
+  buildQuizQueue();
+
+  if (quizQueue.length === 0) {
+    area.innerHTML = `<div class="quiz-empty">
+      <span class="emoji">🏆</span>
+      <p>You've mastered the gender of all<br><strong>${quizMastered.size}</strong> word${quizMastered.size !== 1 ? 's' : ''} in the quiz!<br>Keep adding vocab to keep going.</p>
+    </div>`;
+    return;
+  }
+
+  // Pick next word
+  quizCurrent = quizQueue[0];
+  quizAnswered = false;
+  const word = vocab[quizCurrent];
+  const correct = (quizProgress[quizCurrent] || 0);
+
+  // Build pips (3 total)
+  let pips = '';
+  for (let i = 0; i < 3; i++) {
+    pips += `<div class="pip${i < correct ? ' filled' : ''}"></div>`;
+  }
+
+  area.innerHTML = `
+    <div class="quiz-card" id="quizCard">
+      <div class="quiz-noun">${word.german}</div>
+      <div class="quiz-noun-english">${word.english}</div>
+      <div class="quiz-progress-pips">${pips}</div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </div>
+    <div class="quiz-answers">
+      <button class="btn-article der-btn" onclick="quizAnswer('der')">der</button>
+      <button class="btn-article die-btn" onclick="quizAnswer('die')">die</button>
+      <button class="btn-article das-btn" onclick="quizAnswer('das')">das</button>
+    </div>
+    <button class="quiz-next-btn" id="quizNextBtn" onclick="renderQuiz()">Next →</button>
+  `;
+
+  updateQuizStats();
+}
+
+function quizAnswer(chosen) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const word    = vocab[quizCurrent];
+  const correct = word.article.toLowerCase();
+  const isRight = chosen === correct;
+
+  const card     = document.getElementById('quizCard');
+  const feedback = document.getElementById('quizFeedback');
+  const btns     = document.querySelectorAll('.btn-article');
+
+  // Disable all buttons
+  btns.forEach(b => b.disabled = true);
+
+  if (isRight) {
+    quizSessionCorrect++;
+    const newCount = (quizProgress[quizCurrent] || 0) + 1;
+    quizProgress[quizCurrent] = newCount;
+
+    card.classList.add('correct');
+    feedback.textContent = newCount >= 3 ? '✓ MASTERED!' : `✓ CORRECT  (${newCount}/3)`;
+    feedback.className = 'quiz-feedback show correct-text';
+
+    if (newCount >= 3) {
+      quizMastered.add(quizCurrent);
+      delete quizProgress[quizCurrent];
+    }
+
+    // Highlight chosen button green
+    btns.forEach(b => {
+      if (b.textContent.trim() === chosen) {
+        b.style.background    = 'rgba(0,229,195,0.18)';
+        b.style.borderColor   = 'rgba(0,229,195,0.6)';
+        b.style.color         = '#5DECC8';
+        b.style.opacity       = '1';
+        b.style.boxShadow     = '0 0 20px rgba(0,229,195,0.25)';
+      }
+    });
+
+  } else {
+    quizSessionWrong++;
+    // Reset progress on wrong
+    quizProgress[quizCurrent] = 0;
+
+    card.classList.add('wrong');
+    feedback.textContent = `✗ IT'S  "${correct.toUpperCase()}"`;
+    feedback.className = 'quiz-feedback show wrong-text';
+
+    // Highlight chosen button red, reveal correct
+    btns.forEach(b => {
+      const bArticle = b.textContent.trim();
+      if (bArticle === chosen) {
+        b.style.background  = 'rgba(251,113,133,0.18)';
+        b.style.borderColor = 'rgba(251,113,133,0.6)';
+        b.style.color       = '#FB7185';
+        b.style.opacity     = '1';
+      }
+      if (bArticle === correct) {
+        // reveal correct with its gender color
+        b.classList.add('reveal-correct');
+      }
+    });
+  }
+
+  saveQuizState();
+  updateQuizStats();
+
+  // Show next button
+  const nextBtn = document.getElementById('quizNextBtn');
+  nextBtn.classList.add('show');
+}
+
+// Toggle quiz open/close
+document.getElementById('btnQuizToggle').addEventListener('click', () => {
+  const section = document.getElementById('quizSection');
+  const btn     = document.getElementById('btnQuizToggle');
+  const isOpen  = section.classList.contains('open');
+  if (isOpen) {
+    section.classList.remove('open');
+    btn.classList.remove('active');
+  } else {
+    section.classList.add('open');
+    btn.classList.add('active');
+    renderQuiz();
+  }
+});
+
+// ─── REGISTER SERVICE WORKER ──────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+loadQuizState();
+buildQueue();
+render();
+</script>
+</body>
+</html>
