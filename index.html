@@ -987,8 +987,25 @@ const LS_PASSED = 'deutsch_passed';
 function loadState() {
   const v = localStorage.getItem(LS_VOCAB);
   const p = localStorage.getItem(LS_PASSED);
-  vocab  = v ? JSON.parse(v) : JSON.parse(JSON.stringify(DEFAULT_VOCAB));
-  passed = p ? new Set(JSON.parse(p)) : new Set();
+  if (v) {
+    try {
+      const parsed = JSON.parse(v);
+      vocab = (Array.isArray(parsed) && parsed.length > 0)
+        ? parsed
+        : JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+    } catch(e) {
+      vocab = JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+    }
+  } else {
+    // First ever load — seed from defaults and persist immediately
+    vocab = JSON.parse(JSON.stringify(DEFAULT_VOCAB));
+    localStorage.setItem(LS_VOCAB, JSON.stringify(vocab));
+  }
+  try {
+    passed = p ? new Set(JSON.parse(p)) : new Set();
+  } catch(e) {
+    passed = new Set();
+  }
 }
 
 function saveState() {
